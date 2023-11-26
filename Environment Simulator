@@ -1,0 +1,71 @@
+import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, Point, LineString
+import random as rn
+
+def generate_random_polygon(num_sides):
+    # Generate a random polygon with the specified number of sides
+    vertices = [(rn.randint(0, 25), rn.randint(0, 25)) for _ in range(num_sides)]
+    return Polygon(vertices)
+
+def generate_non_overlapping_polygons(num_polygons):
+    polygons = []
+    for i in range(num_polygons):
+        num_sides = rn.randint(3, 5)
+        new_polygon = Polygon([(rn.randint(i * 5, i * 5 + 10), rn.randint(i * 5, i * 5 + 10)) for _ in range(num_sides)])
+        
+        # Check for intersection with existing polygons
+        intersects = any(existing_polygon.intersects(new_polygon) for existing_polygon in polygons)
+        
+        # If intersection found, generate a new polygon
+        while intersects:
+            new_polygon = Polygon([(rn.randint(i * 5, i * 5 + 10), rn.randint(i * 5, i * 5 + 10)) for _ in range(num_sides)])
+            intersects = any(existing_polygon.intersects(new_polygon) for existing_polygon in polygons)
+        
+        polygons.append(new_polygon)
+    
+    return polygons
+
+def plot_environment(polygons, start_point, end_point, save=False):
+    fig, ax = plt.subplots()
+
+    # Plot the bounding box
+    bounding_box = Polygon([(0, 0), (0, 30), (30, 30), (30, 0)])
+    x, y = bounding_box.exterior.xy
+    ax.fill(x, y, facecolor='none', edgecolor='black', linestyle='--')
+
+    # Plot the polygons
+    for polygon in polygons:
+        x, y = polygon.exterior.xy
+        ax.fill(x, y, facecolor='blue', edgecolor='black', alpha=0.5)
+
+    # Plot start and end points
+    ax.plot(start_point.x, start_point.y, marker='o', markersize=10, color='green', label='Start Point')
+    ax.plot(end_point.x, end_point.y, marker='o', markersize=10, color='red', label='End Point')
+
+    ax.set_xlim(0, 30)
+    ax.set_ylim(0, 30)
+    ax.set_aspect('equal', adjustable='box')  # Equal aspect ratio for x and y axes
+    ax.set_xlabel('X-axis')
+    ax.set_ylabel('Y-axis')
+    ax.legend()
+
+    plt.show()
+    if save:
+        plt.savefig("environment_plot.jpg")
+
+if __name__ == "__main__":
+    num_polygons = int(input("Enter the number of polygons you need: "))
+    
+    # Generate non-overlapping polygons
+    polygons = generate_non_overlapping_polygons(num_polygons)
+
+    # Generate start and end points
+    start_point = Point(5, 5)
+    end_point = Point(25, 25)
+
+    # Display the bounding boxes of the polygons
+    for poly in polygons:
+        print(poly.bounds)
+
+    # Plot the environment with bounding box, polygons, and start/end points
+    plot_environment(polygons, start_point, end_point)
