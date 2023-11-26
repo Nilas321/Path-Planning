@@ -1,61 +1,52 @@
+# path_planning_simulation.py
+from environment import generate_non_overlapping_polygons, generate_start_end_points, plot_environment
+from rrt import rrt_connect, RRTNode, generate_random_point
 import matplotlib.pyplot as plt
-from shapely.geometry import Polygon, Point, LineString
-import random as rn
+from shapely.geometry import Point, LineString
+def plot_rrt_path_with_start_end(rrt_path, start_point, end_point, polygons):
+    fig, ax = plt.subplots()
 
-# Import functions from environment_simulation.py
-from environment_simulation import generate_non_overlapping_polygons, plot_environment
+    # Plot the environment with bounding box, polygons, and start/end points
+    plot_environment(polygons, start_point, end_point, ax=ax)
 
-# Import functions from rrt_path_planning.py
-from rrt_path_planning import RRTNode, generate_random_point, find_nearest_node, is_collision_free, generate_rrt, extract_path, plot_rrt
+    # Plot the RRT path with additional plots joining start and end points
+    ax.plot([point.x for point in rrt_path], [point.y for point in rrt_path], color='purple', label='RRT Path')
+    ax.plot([start_point.x, rrt_path[0].x], [start_point.y, rrt_path[0].y], linestyle='--', color='orange', label='Start to RRT Path')
+    ax.plot([rrt_path[-1].x, end_point.x], [rrt_path[-1].y, end_point.y], linestyle='--', color='orange', label='RRT Path to End')
+    
+    ax.legend()
+    plt.show()
 
-def main():
+if __name__ == "__main__":
     num_polygons = int(input("Enter the number of polygons you need: "))
     
     # Generate non-overlapping polygons
     polygons = generate_non_overlapping_polygons(num_polygons)
 
-    # Generate start and end points
-    start_point = Point(5, 5)
-    end_point = Point(25, 25)
+    # Generate start and end points not inside any polygon
+    start_point, end_point = generate_start_end_points(polygons)
 
     # Display the bounding boxes of the polygons
     for poly in polygons:
         print(poly.bounds)
+    
+    plot_environment(polygons, start_point, end_point)
+    plt.show()
+
+    # path_planning_simulation.py
+
+        # ... (previous code)
+
+    # Run RRT to find a path
+    path = rrt_connect(start_point, end_point, polygons)
 
     # Plot the environment with bounding box, polygons, and start/end points
     plot_environment(polygons, start_point, end_point)
 
-    # Generate RRT
-    rrt_tree = generate_rrt(start_point, end_point, polygons)
-
-    # Extract the path from the RRT tree
-    path = extract_path(rrt_tree)
-
-    # Plot the RRT and environment
-    plot_rrt(rrt_tree, polygons, start_point, end_point)
-
-    # Plot the final path
-    fig, ax = plt.subplots()
-    for obstacle in polygons:
-        x, y = obstacle.exterior.xy
-        ax.fill(x, y, facecolor='gray', edgecolor='black')
-
-    for i in range(len(path) - 1):
-        line = LineString([path[i], path[i + 1]])
-        x, y = line.xy
-        ax.plot(x, y, color='green', linewidth=2)
-
-    ax.plot(start_point.x, start_point.y, marker='o', markersize=10, color='green', label='Start Point')
-    ax.plot(end_point.x, end_point.y, marker='o', markersize=10, color='red', label='End Point')
-
-    ax.set_xlim(0, 30)
-    ax.set_ylim(0, 30)
-    ax.set_aspect('equal', adjustable='box')  # Equal aspect ratio for x and y axes
-    ax.set_xlabel('X-axis')
-    ax.set_ylabel('Y-axis')
-    ax.legend()
-
+    # Plot the RRT path with additional plots joining start and end points
+    if path:
+        plt.plot([point.x for point in path], [point.y for point in path], color='purple', label='RRT Path')
+        plt.plot([start_point.x, path[0].x], [start_point.y, path[0].y], linestyle='--', color='orange', label='Start to RRT Path')
+        plt.plot([path[-1].x, end_point.x], [path[-1].y, end_point.y], linestyle='--', color='orange', label='RRT Path to End')
+    plt.legend()
     plt.show()
-
-if __name__ == "__main__":
-    main()
