@@ -1,0 +1,61 @@
+import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, Point, LineString
+import random as rn
+
+# Import functions from environment_simulation.py
+from environment_simulation import generate_non_overlapping_polygons, plot_environment
+
+# Import functions from rrt_path_planning.py
+from rrt_path_planning import RRTNode, generate_random_point, find_nearest_node, is_collision_free, generate_rrt, extract_path, plot_rrt
+
+def main():
+    num_polygons = int(input("Enter the number of polygons you need: "))
+    
+    # Generate non-overlapping polygons
+    polygons = generate_non_overlapping_polygons(num_polygons)
+
+    # Generate start and end points
+    start_point = Point(5, 5)
+    end_point = Point(25, 25)
+
+    # Display the bounding boxes of the polygons
+    for poly in polygons:
+        print(poly.bounds)
+
+    # Plot the environment with bounding box, polygons, and start/end points
+    plot_environment(polygons, start_point, end_point)
+
+    # Generate RRT
+    rrt_tree = generate_rrt(start_point, end_point, polygons)
+
+    # Extract the path from the RRT tree
+    path = extract_path(rrt_tree)
+
+    # Plot the RRT and environment
+    plot_rrt(rrt_tree, polygons, start_point, end_point)
+
+    # Plot the final path
+    fig, ax = plt.subplots()
+    for obstacle in polygons:
+        x, y = obstacle.exterior.xy
+        ax.fill(x, y, facecolor='gray', edgecolor='black')
+
+    for i in range(len(path) - 1):
+        line = LineString([path[i], path[i + 1]])
+        x, y = line.xy
+        ax.plot(x, y, color='green', linewidth=2)
+
+    ax.plot(start_point.x, start_point.y, marker='o', markersize=10, color='green', label='Start Point')
+    ax.plot(end_point.x, end_point.y, marker='o', markersize=10, color='red', label='End Point')
+
+    ax.set_xlim(0, 30)
+    ax.set_ylim(0, 30)
+    ax.set_aspect('equal', adjustable='box')  # Equal aspect ratio for x and y axes
+    ax.set_xlabel('X-axis')
+    ax.set_ylabel('Y-axis')
+    ax.legend()
+
+    plt.show()
+
+if __name__ == "__main__":
+    main()
