@@ -31,28 +31,20 @@ def generate_start_end_points(polygons):
         if all(not polygon.contains(point) for polygon in polygons for point in [start_point, end_point]):
             return start_point, end_point
 
-# environment.py
-
-import matplotlib.pyplot as plt
-from shapely.geometry import Polygon, Point
-
-# ... (other functions remain unchanged)
 
 def plot_environment(polygons, start_point, end_point, save=False, ax=None):
     if ax is None:
         fig, ax = plt.subplots()
 
-    # Plot the bounding box
+    
     bounding_box = Polygon([(0, 0), (0, 30), (30, 30), (30, 0)])
     x, y = bounding_box.exterior.xy
     ax.fill(x, y, facecolor='none', edgecolor='black', linestyle='--')
 
-    # Plot the polygons
     for polygon in polygons:
         x, y = polygon.exterior.xy
         ax.fill(x, y, facecolor='blue', edgecolor='black', alpha=0.5)
 
-    # Plot start and end points
     ax.plot(start_point.x, start_point.y, marker='o', markersize=10, color='green', label='Start Point')
     ax.plot(end_point.x, end_point.y, marker='o', markersize=10, color='red', label='End Point')
 
