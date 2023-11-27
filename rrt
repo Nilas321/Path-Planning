@@ -39,9 +39,6 @@ def extend_tree(rrt, target_point, polygons, step_size=1.0):
 
     return rrt
 
-# rrt.py
-
-# ... (previous code)
 
 def rrt_connect(start_point, end_point, polygons, max_iter=1000, step_size=1.0):
     start_node = RRTNode(start_point)
