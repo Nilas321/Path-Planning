@@ -1,15 +1,13 @@
-# path_planning_simulation.py
 from environment import generate_non_overlapping_polygons, generate_start_end_points, plot_environment
 from rrt import rrt_connect, RRTNode, generate_random_point
 import matplotlib.pyplot as plt
 from shapely.geometry import Point, LineString
+
 def plot_rrt_path_with_start_end(rrt_path, start_point, end_point, polygons):
     fig, ax = plt.subplots()
 
-    # Plot the environment with bounding box, polygons, and start/end points
     plot_environment(polygons, start_point, end_point, ax=ax)
 
-    # Plot the RRT path with additional plots joining start and end points
     ax.plot([point.x for point in rrt_path], [point.y for point in rrt_path], color='purple', label='RRT Path')
     ax.plot([start_point.x, rrt_path[0].x], [start_point.y, rrt_path[0].y], linestyle='--', color='orange', label='Start to RRT Path')
     ax.plot([rrt_path[-1].x, end_point.x], [rrt_path[-1].y, end_point.y], linestyle='--', color='orange', label='RRT Path to End')
@@ -20,30 +18,18 @@ def plot_rrt_path_with_start_end(rrt_path, start_point, end_point, polygons):
 if __name__ == "__main__":
     num_polygons = int(input("Enter the number of polygons you need: "))
     
-    # Generate non-overlapping polygons
     polygons = generate_non_overlapping_polygons(num_polygons)
 
-    # Generate start and end points not inside any polygon
     start_point, end_point = generate_start_end_points(polygons)
 
-    # Display the bounding boxes of the polygons
     for poly in polygons:
         print(poly.bounds)
     
     plot_environment(polygons, start_point, end_point)
     plt.show()
 
-    # path_planning_simulation.py
-
-        # ... (previous code)
-
-    # Run RRT to find a path
     path = rrt_connect(start_point, end_point, polygons)
-
-    # Plot the environment with bounding box, polygons, and start/end points
     plot_environment(polygons, start_point, end_point)
-
-    # Plot the RRT path with additional plots joining start and end points
     if path:
         plt.plot([point.x for point in path], [point.y for point in path], color='purple', label='RRT Path')
         plt.plot([start_point.x, path[0].x], [start_point.y, path[0].y], linestyle='--', color='orange', label='Start to RRT Path')
