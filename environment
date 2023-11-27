@@ -1,4 +1,6 @@
+Certainly, here is the code with comments removed:
 
+```python
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon, Point
 import random as rn
@@ -31,12 +33,15 @@ def generate_start_end_points(polygons):
         if all(not polygon.contains(point) for polygon in polygons for point in [start_point, end_point]):
             return start_point, end_point
 
+# environment.py
+
+import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, Point
 
 def plot_environment(polygons, start_point, end_point, save=False, ax=None):
     if ax is None:
         fig, ax = plt.subplots()
 
-    
     bounding_box = Polygon([(0, 0), (0, 30), (30, 30), (30, 0)])
     x, y = bounding_box.exterior.xy
     ax.fill(x, y, facecolor='none', edgecolor='black', linestyle='--')
@@ -50,7 +55,7 @@ def plot_environment(polygons, start_point, end_point, save=False, ax=None):
 
     ax.set_xlim(0, 30)
     ax.set_ylim(0, 30)
-    ax.set_aspect('equal', adjustable='box')  # Equal aspect ratio for x and y axes
+    ax.set_aspect('equal', adjustable='box')  
     ax.set_xlabel('X-axis')
     ax.set_ylabel('Y-axis')
     ax.legend()
@@ -60,4 +65,4 @@ def plot_environment(polygons, start_point, end_point, save=False, ax=None):
 
     if ax is None:
         plt.show()
-
+```
