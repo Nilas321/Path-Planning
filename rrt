@@ -14,7 +14,7 @@ def nearest_node(rrt, target_point):
     distances = [point.distance(target_point) for point in rrt]
     return rrt[distances.index(min(distances))], min(distances)
 
-def extend_tree(rrt, target_point, polygons, step_size=1.0):
+def extend_tree(rrt, target_point, polygons, step_size=1.0, safety_distance=0.5):
     current_point = generate_random_point()
     nearest, distance = nearest_node(rrt, current_point)
 
@@ -26,30 +26,28 @@ def extend_tree(rrt, target_point, polygons, step_size=1.0):
 
     new_point = Point(nearest.point.x + direction_vector[0], nearest.point.y + direction_vector[1])
 
-    # Check if the line segment from nearest to new_point intersects with any polygon
-    line_segment = LineString([nearest.point, new_point])
-    intersects_with_polygons = any(polygon.intersects(line_segment) for polygon in polygons)
+    is_inside_polygons = any(polygon.contains(new_point) for polygon in polygons)
 
-    # Check if the line segment from nearest to new_point intersects with any other part of the tree
-    intersects_with_tree = any(nearest_point.point.distance(new_point) < step_size for nearest_point in rrt)
+    if not is_inside_polygons:
+        line_segment = LineString([nearest.point, new_point])
+        intersects_with_polygons = any(polygon.buffer(safety_distance).intersects(line_segment) for polygon in polygons)
+        intersects_with_tree = any(nearest_point.point.distance(new_point) < step_size for nearest_point in rrt)
 
-    if not intersects_with_polygons and not intersects_with_tree:
-        new_node = RRTNode(new_point, parent=nearest)
-        rrt.append(new_node)
+        if not intersects_with_polygons and not intersects_with_tree:
+            new_node = RRTNode(new_point, parent=nearest)
+            rrt.append(new_node)
 
     return rrt
 
-
-def rrt_connect(start_point, end_point, polygons, max_iter=1000, step_size=1.0):
+def rrt_connect(start_point, end_point, polygons, max_iter=1000, step_size=0.5):
     start_node = RRTNode(start_point)
     end_node = RRTNode(end_point)
     rrt_start = [start_node]
 
     for _ in range(max_iter):
         rrt_start = extend_tree(rrt_start, end_point, polygons, step_size)
-
-        # Check if the goal is reached
         nearest, distance = nearest_node(rrt_start, end_point)
+
         if distance < step_size:
             path = [nearest.point]
             while nearest.parent:
